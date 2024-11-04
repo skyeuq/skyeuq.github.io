@@ -16,12 +16,12 @@ style.textContent = `
     }
 
     .speech-bubble[data-my-dog] {
-        background: #FFEBEE;
+        background: #fffbd7;
         border-radius: 8px;
         padding: 10px 15px;
         max-width: 250px;
         font-size: 14px;
-        color: #C2185B;
+        color: #525252;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         position: relative;
         z-index: 1;
@@ -40,7 +40,7 @@ style.textContent = `
     }
 
     .floating-bubble[data-my-dog] {
-        background: linear-gradient(145deg, #FFEBEE, #FFCDD2);
+        background: linear-gradient(145deg, #fff7dd, #fff0e1);
         border-radius: 50%;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         animation: float 1s ease-in-out infinite alternate;
@@ -114,11 +114,11 @@ container.appendChild(bubbleContainerEl);
 document.body.appendChild(container);
 
 const contentList = [
-    "我闻到了美味的骨头！ 🦴",
-    "快来和我玩，主人！ 🐾",
+    "狗闻到了美味的骨头！ 🦴",
+    "快来和狗玩，主人！ 🐾",
     "你能再给我一点零食吗？ 🍖",
-    "人家不要洗澡嘛~~ 🐕",
-    "新朋友吗？我可以闻闻吗？ 🐶",
+    "狗不要洗澡嘛~~ 🐕",
+    "新朋友吗？给狗闻闻！🐶",
     "不要抛下狗 狗很乖的 ❤️",
     "可以带狗去散步嘛！ 🌳",
     "快看狗的尾巴！ 👋"
