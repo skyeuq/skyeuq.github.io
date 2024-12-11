@@ -1,0 +1,374 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Linux网络编程 | Skye's Cottage</title><meta name="author" content="Skye Lee"><meta name="copyright" content="Skye Lee"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="无论是 Web 服务器处理网页请求、即时通讯工具的消息传递，还是在线游戏的数据同步，都离不开 Socket 的支持。Socket 的本质，是将复杂的网络通信抽象成一个简单的接口，让开发者可以通过像操作文件一样的方式实现数据的收发。这也是”Unix中万物皆文件”。本文将以 TCP Socket 编程为例，逐步拆解从服务器端到客户端的交互过程，解析系统调用的作用，建立清晰的理解框架。 什么是 Sock">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux网络编程">
+<meta property="og:url" content="http://example.com/2024/12/11/netprogram/index.html">
+<meta property="og:site_name" content="Skye&#39;s Cottage">
+<meta property="og:description" content="无论是 Web 服务器处理网页请求、即时通讯工具的消息传递，还是在线游戏的数据同步，都离不开 Socket 的支持。Socket 的本质，是将复杂的网络通信抽象成一个简单的接口，让开发者可以通过像操作文件一样的方式实现数据的收发。这也是”Unix中万物皆文件”。本文将以 TCP Socket 编程为例，逐步拆解从服务器端到客户端的交互过程，解析系统调用的作用，建立清晰的理解框架。 什么是 Sock">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/linux.png">
+<meta property="article:published_time" content="2024-12-11T08:55:54.000Z">
+<meta property="article:modified_time" content="2024-12-11T12:15:22.617Z">
+<meta property="article:author" content="Skye Lee">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/linux.png"><link rel="shortcut icon" href="/images/cattage.png"><link rel="canonical" href="http://example.com/2024/12/11/netprogram/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found"}},
+  translate: undefined,
+  noticeOutdate: {"limitDay":50,"position":"top","messagePrev":"已经有","messageNext":"天没更新了，戳戳更新😴😴"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Linux网络编程',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-12-11 20:15:22'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/load.css"><link rel="stylesheet" href="/css/wave.css"><link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/macWhite.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><div class="loading-img"></div><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">4</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/images/linux.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Skye's Cottage"><img class="site-icon" src="/img/loading.gif" data-original="/images/elephant.png"/><span class="site-name">Skye's Cottage</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Linux网络编程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-12-11T08:55:54.000Z" title="Created 2024-12-11 16:55:54">2024-12-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-12-11T12:15:22.617Z" title="Updated 2024-12-11 20:15:22">2024-12-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Linux网络编程"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">Comments:</span><a href="/2024/12/11/netprogram/#post-comment"><span class="gitalk-comment-count"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"></section><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="98" y="10"></use><use href="#gentle-wave" x="98" y="13"></use><use href="#gentle-wave" x="98" y="15"></use><use href="#gentle-wave" x="98" y="17"></use></g></svg><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" style="background-image: url('/images/linux.png')"></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>无论是 Web 服务器处理网页请求、即时通讯工具的消息传递，还是在线游戏的数据同步，都离不开 Socket 的支持。Socket 的本质，是将复杂的网络通信抽象成一个简单的接口，让开发者可以通过像操作文件一样的方式实现数据的收发。这也是”Unix中万物皆文件”。本文将以 TCP Socket 编程为例，逐步拆解从服务器端到客户端的交互过程，解析系统调用的作用，建立清晰的理解框架。</p>
+<h2 id="什么是-Socket？"><a href="#什么是-Socket？" class="headerlink" title="什么是 Socket？"></a>什么是 Socket？</h2><p>Socket 提供了一种通信的端点，就像电器与电源的插座。通过 Socket，两个设备之间可以建立通信链接。<br>程序员只需要按照 Socket 提供的接口进行操作，不需要关心底层的复杂网络协议。</p>
+<p>Socket 的现代实现被称为 Berkeley Sockets，因为它起源于 Berkeley Unix（BSD Unix）中，是基于 Unix 操作系统设计的。Berkeley Sockets 的出现奠定了今天网络编程的基础。</p>
+<ul>
+<li>在Web浏览器与Web服务器通信：浏览器通过 Socket 向服务器发送 HTTP 请求，服务器通过 Socket 返回 HTTP 响应。</li>
+<li>在即时通讯工具中传递消息：客户端通过 Socket 向服务器发送消息，服务器通过 Socket 将消息推送给其他客户端。</li>
+<li>在在线游戏中同步数据：客户端通过 Socket 向服务器发送操作指令，服务器通过 Socket 将操作结果推送给其他客户端。</li>
+</ul>
+<h2 id="工作原理，怎么打电话？"><a href="#工作原理，怎么打电话？" class="headerlink" title="工作原理，怎么打电话？"></a>工作原理，怎么打电话？</h2><ul>
+<li>首先，我们需要一个电话，也就是创建一个 Socket 对象。</li>
+<li>如果想给朋友打电话，首先要知道朋友的电话号码。Socket 通信也是一样，需要知道对方的 IP 地址和端口号。<blockquote>
+<p>IP类似于大楼的地址，而Socket端口号类似于房间号。即我们通过IP地址实现主机到主机的通信，通过端口号实现主机内的进程到进程的通信。</p>
+</blockquote>
+</li>
+<li>打通电话后，可以开始通话。你说一句话（发送数据），对方听到并回复（接收数据）。Socket 通信也是一样，建立连接后，可以开始传输数据。</li>
+<li>通话结束后，挂断电话。Socket通信结束后，关闭 Socket。</li>
+</ul>
+<h2 id="TCP与UDP，就像是打电话和写信"><a href="#TCP与UDP，就像是打电话和写信" class="headerlink" title="TCP与UDP，就像是打电话和写信"></a>TCP与UDP，就像是打电话和写信</h2><p>Socket 通信可以基于两种协议：TCP 和 UDP。TCP需要建立连接，而UDP不需要建立连接。</p>
+<ul>
+<li><strong>TCP（Transmission Control Protocol）</strong>：面向连接的协议，提供可靠的数据传输。TCP 保证数据的顺序和完整性，适用于要求数据准确无误的场景（网页、聊天、文件传输）。</li>
+<li><strong>UDP（User Datagram Protocol）</strong>：面向无连接的协议，提供高效的数据传输。UDP 不保证数据的顺序和完整性，适用于实时性要求高的场景（在线游戏、直播）。</li>
+</ul>
+<h2 id="TCP-Socket通信模型"><a href="#TCP-Socket通信模型" class="headerlink" title="TCP Socket通信模型"></a>TCP Socket通信模型</h2><h3 id="TCP-Socket-通信模型是一种客户端-服务器模型。"><a href="#TCP-Socket-通信模型是一种客户端-服务器模型。" class="headerlink" title="TCP Socket 通信模型是一种客户端-服务器模型。"></a>TCP Socket 通信模型是一种客户端-服务器模型。</h3><ul>
+<li><strong>服务器（Server）</strong>：被叫方（接线员）随时准备接电话。在程序中表示为一个服务器进程，而不是硬件服务器。</li>
+<li><strong>客户端（Client）</strong>：主动拨打电话。在程序中表示为一个客户端进程。</li>
+</ul>
+<h3 id="双工文件描述符"><a href="#双工文件描述符" class="headerlink" title="双工文件描述符"></a>双工文件描述符</h3><p>使用TCP Socket进行通信后，客户端和服务器各自都会获得一个文件描述符，这使得网络通信就像在操作文件。<br>写操作即是发送字节给对方，而读操作就是接受对方发送的字节。</p>
+<blockquote>
+<p>文件描述符是操作系统中对文件的引用，是一个非负整数。在Linux系统中，文件描述符0、1、2分别对应标准输入、标准输出和标准错误。<br>每次打开一个文件或资源，操作系统都会返回一个文件描述符，用于后续对文件的操作。</p>
+</blockquote>
+<h3 id="TCP服务器系统调用过程"><a href="#TCP服务器系统调用过程" class="headerlink" title="TCP服务器系统调用过程"></a>TCP服务器系统调用过程</h3><p><img src="/img/loading.gif" data-original="/images/linux/net_map.png" alt="模型"></p>
+<ul>
+<li>socket() <font color="pink" weigh="bold">–准备好电话啦☎️</font><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建服务器的 Socket</span></span><br><span class="line"><span class="comment">// socket() 函数创建一个 Socket，返回一个文件描述符</span></span><br><span class="line"><span class="comment">// 参数说明：</span></span><br><span class="line"><span class="comment">// - AF_INET: 表示使用 IPv4,AF_INET6 表示 IPv6</span></span><br><span class="line"><span class="comment">// - SOCK_STREAM: 表示使用 TCP（流式传输）.SOCK_DGRAM 表示 UDP（数据报传输）</span></span><br><span class="line"><span class="comment">// - 0: 默认协议（通常是 TCP）</span></span><br><span class="line">server_fd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (server_fd == <span class="number">-1</span>) &#123;               <span class="comment">// 如果返回 -1，表示创建失败</span></span><br><span class="line">    perror(<span class="string">&quot;socket&quot;</span>);                <span class="comment">// 打印错误信息</span></span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);              <span class="comment">// 退出程序</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 配置服务器地址</span></span><br><span class="line">server_addr.sin_family = AF_INET;    <span class="comment">// 地址族，AF_INET 表示 IPv4</span></span><br><span class="line">server_addr.sin_addr.s_addr = INADDR_ANY;  <span class="comment">// 监听所有网络接口（本机 IP）</span></span><br><span class="line">server_addr.sin_port = htons(PORT); <span class="comment">// 将端口号转换为网络字节序</span></span><br></pre></td></tr></table></figure>
+上述代码除了创建服务器的socket外，还对服务器地址进行了配置。配置过程的主要任务就是告诉操作系统，使用哪种地址类型，绑定到哪个IP地址和端口号。<br>而这些信息都存储在struct sockaddr_in结构体中，通过该结构体的成员变量进行配置。<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">    <span class="type">sa_family_t</span> sin_family;   <span class="comment">// 地址族 (AF_INET 表示 IPv4)</span></span><br><span class="line">    <span class="type">in_port_t</span> sin_port;       <span class="comment">// 16 位端口号（网络字节序）</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span>  <span class="comment">// IPv4 地址</span></span><br><span class="line">    <span class="type">char</span> sin_zero[<span class="number">8</span>];         <span class="comment">// 填充字段，保持与 struct sockaddr 大小一致</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+在配置IP地址时用到了INADDR_ANY，它表示监听所有网络接口，即服务器将接受来自任何网络接口的连接请求。<blockquote>
+<p>网络接口是连接设备和网络的桥梁，每个接口可以有自己的IP地址，例如有线网卡、无线网卡等。一台服务器可能有多个网络接口，一个连接到内网，一个连接到外网。所以一台服务器可能有多个IP地址。<br>INADDR_ANY表示监听所有网络接口，而INADDR_LOOPBACK表示监听本地回环接口，即只接受来自本机的连接请求。</p>
+</blockquote>
+</li>
+</ul>
+<p>在配置端口号时，使用了htons()函数将端口号转换为网络字节序。网络字节序是大端字节序，即高位字节存储在低地址，低位字节存储在高地址。</p>
+<ul>
+<li><p>bind() <font color="pink" weigh="bold">给电话装上号码📞</font></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3. 绑定地址到服务器的 Socket</span></span><br><span class="line"><span class="comment">// bind() 函数将服务器地址绑定到服务器 Socket</span></span><br><span class="line"><span class="keyword">if</span> (bind(server_fd, (<span class="keyword">struct</span> sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(server_addr)) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;bind&quot;</span>);                  <span class="comment">// 如果失败，打印错误信息</span></span><br><span class="line">    close(server_fd);                <span class="comment">// 关闭文件描述符</span></span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);              <span class="comment">// 退出程序</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>listen() <font color="pink" weigh="bold">准备接听来电🤭</font></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 4. 开始监听端口</span></span><br><span class="line"><span class="comment">// listen() 函数使服务器进入监听状态，准备接受连接</span></span><br><span class="line"><span class="comment">// 第二个参数指定连接队列的最大长度（这里为 5）</span></span><br><span class="line"><span class="keyword">if</span> (listen(server_fd, <span class="number">5</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;listen&quot;</span>);                <span class="comment">// 如果失败，打印错误信息</span></span><br><span class="line">    close(server_fd);                <span class="comment">// 关闭文件描述符</span></span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);              <span class="comment">// 退出程序</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Server is listening on port %d...\n&quot;</span>, PORT);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>accept() <font color="pink" weigh="bold">电话接通了🤩</font></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 5. 接受客户端连接</span></span><br><span class="line"><span class="comment">// accept() 函数等待客户端连接，成功后返回一个新的文件描述符（用于与客户端通信）</span></span><br><span class="line">client_fd = accept(server_fd, (<span class="keyword">struct</span> sockaddr *)&amp;client_addr, &amp;addr_len);</span><br><span class="line"><span class="keyword">if</span> (client_fd == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;accept&quot;</span>);                <span class="comment">// 如果失败，打印错误信息</span></span><br><span class="line">    close(server_fd);                <span class="comment">// 关闭文件描述符</span></span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);              <span class="comment">// 退出程序</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Client connected!\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>(struct sockaddr *)&amp;client_addr的含义<br>在网络编程中，许多函数（如 bind() 和 connect()）需要传递地址参数，类型为 struct sockaddr *，而不是 struct sockaddr_in *。<br>struct sockaddr 是一个通用的地址结构，可以表示多种类型的地址（IPv4、IPv6 等）。 struct sockaddr_in 是 IPv4 专用的地址结构。<br>函数要求地址参数的类型为 struct sockaddr *，以便支持多种协议。<br>为了解决这个问题，可以使用类型转换将 struct sockaddr_in * 转换为 struct sockaddr *，这样就可以传递给函数了。</p>
+</blockquote>
+</li>
+</ul>
+<p>accept()函数会阻塞等待客户端连接，一旦有客户端连接，就会返回一个新的文件描述符，用于与客户端通信。<br>这两个文件描述符各司其职，server_fd用于监听客户端连接，而client_fd用于与客户端通信。</p>
+<ul>
+<li><p>read() write() <font color="pink" weigh="bold">通话中…🤔</font></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 6. 接收客户端发送的消息</span></span><br><span class="line"><span class="built_in">memset</span>(buffer, <span class="number">0</span>, BUFFER_SIZE);      <span class="comment">// 清空缓冲区</span></span><br><span class="line">read(client_fd, buffer, BUFFER_SIZE); <span class="comment">// 从客户端接收数据，存入缓冲区</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Client says: %s\n&quot;</span>, buffer); <span class="comment">// 打印接收到的消息</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 7. 回复客户端</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *response = <span class="string">&quot;Hello from server!&quot;</span>;</span><br><span class="line">write(client_fd, response, <span class="built_in">strlen</span>(response));  <span class="comment">// 将消息发送给客户端</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>close() <font color="pink" weigh="bold">挂断电话👋</font></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 8. 关闭文件描述符</span></span><br><span class="line">close(client_fd);                    <span class="comment">// 关闭客户端文件描述符</span></span><br><span class="line">close(server_fd);                    <span class="comment">// 关闭服务器文件描述符</span></span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="TCP客户端系统调用过程"><a href="#TCP客户端系统调用过程" class="headerlink" title="TCP客户端系统调用过程"></a>TCP客户端系统调用过程</h3><p>对于客户端呢，和TCP服务器一样，都要先准备电话，所以socket系统调用与TCP服务器是完全一致的。<br>客户端要想连接服务器，不需要限定自己的IP地址和端口号，只需要知道服务器的IP地址和端口号即可。</p>
+<blockquote>
+<p>IPv4的地址是32位的，通常用点分十进制表示，例如本机回送地址是”127.0.0.1”‘,如果用32位整数表示，就是0x7F000001。十进制就是127<em>256^3+0</em>256^2+0*256+1&#x3D;2130706433。<br>为了方便，我们可以使用inet_addr库函数将点分十进制的IP地址转换为网络字节序的整数。</p>
+</blockquote>
+<p>connect()的调用格式与bind很类似，但是connect后的文件描述符不是通过返回值获得的，而是通过参数sockfd传递的。connect成功后，通过read&#x2F;write操作文件描述符socket就可以与服务器通信了。通信结束后，<br>同样通过close()关闭文件描述符。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 连接服务器</span></span><br><span class="line"><span class="comment">// connect() 函数尝试连接服务器</span></span><br><span class="line"><span class="keyword">if</span> (connect(sock_fd, (<span class="keyword">struct</span> sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(server_addr)) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;connect&quot;</span>);            <span class="comment">// 如果失败，打印错误信息</span></span><br><span class="line">    close(sock_fd);               <span class="comment">// 关闭文件描述符</span></span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);           <span class="comment">// 退出程序</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Connected to server!\n&quot;</span>);</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">Skye Lee</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2024/12/11/netprogram/">http://example.com/2024/12/11/netprogram/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post_share"><div class="social-share" data-image="/images/linux.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/10/17/ManagementCourse/" title="软件项目管理课程"><img class="cover" src="/img/loading.gif" data-original="/images/manage.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">软件项目管理课程</div></div></a></div></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Skye Lee</div><div class="author-info__description">Ordinary but also want to be elegant...</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/skyeuq"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/skyeuq" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:skyelll991@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">HAVE A MAGIC DAY!!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Socket%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">什么是 Socket？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%EF%BC%8C%E6%80%8E%E4%B9%88%E6%89%93%E7%94%B5%E8%AF%9D%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">工作原理，怎么打电话？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP%E4%B8%8EUDP%EF%BC%8C%E5%B0%B1%E5%83%8F%E6%98%AF%E6%89%93%E7%94%B5%E8%AF%9D%E5%92%8C%E5%86%99%E4%BF%A1"><span class="toc-number">3.</span> <span class="toc-text">TCP与UDP，就像是打电话和写信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TCP-Socket%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B"><span class="toc-number">4.</span> <span class="toc-text">TCP Socket通信模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP-Socket-%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B%E6%98%AF%E4%B8%80%E7%A7%8D%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A8%A1%E5%9E%8B%E3%80%82"><span class="toc-number">4.1.</span> <span class="toc-text">TCP Socket 通信模型是一种客户端-服务器模型。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8C%E5%B7%A5%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">4.2.</span> <span class="toc-text">双工文件描述符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">4.3.</span> <span class="toc-text">TCP服务器系统调用过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCP%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">4.4.</span> <span class="toc-text">TCP客户端系统调用过程</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/12/11/netprogram/" title="Linux网络编程"><img src="/img/loading.gif" data-original="/images/linux.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux网络编程"/></a><div class="content"><a class="title" href="/2024/12/11/netprogram/" title="Linux网络编程">Linux网络编程</a><time datetime="2024-12-11T08:55:54.000Z" title="Created 2024-12-11 16:55:54">2024-12-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/10/17/ManagementCourse/" title="软件项目管理课程"><img src="/img/loading.gif" data-original="/images/manage.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="软件项目管理课程"/></a><div class="content"><a class="title" href="/2024/10/17/ManagementCourse/" title="软件项目管理课程">软件项目管理课程</a><time datetime="2024-10-17T08:02:41.000Z" title="Created 2024-10-17 16:02:41">2024-10-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/10/09/avalonia/" title="Avalonia 全栈开发课程"><img src="/img/loading.gif" data-original="/images/avalonia.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Avalonia 全栈开发课程"/></a><div class="content"><a class="title" href="/2024/10/09/avalonia/" title="Avalonia 全栈开发课程">Avalonia 全栈开发课程</a><time datetime="2024-10-09T08:57:26.000Z" title="Created 2024-10-09 16:57:26">2024-10-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/springboot-register/" title="springboot注册"><img src="/img/loading.gif" data-original="/images/spring.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="springboot注册"/></a><div class="content"><a class="title" href="/2024/09/28/springboot-register/" title="springboot注册">springboot注册</a><time datetime="2024-09-28T09:04:45.000Z" title="Created 2024-09-28 17:04:45">2024-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/09/28/mybatis/" title="mybatis"><img src="/img/loading.gif" data-original="/images/mybatisimg.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="mybatis"/></a><div class="content"><a class="title" href="/2024/09/28/mybatis/" title="mybatis">mybatis</a><time datetime="2024-09-28T08:03:46.000Z" title="Created 2024-09-28 16:03:46">2024-09-28</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/images/linux.png')"><div id="footer-wrap"><div class="copyright">&copy;2024 By Skye Lee</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="Chat"><i class="fas fa-sms"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initGitalk = () => {
+    const gitalk = new Gitalk(Object.assign({
+      clientID: 'Ov23liATZoHp5oR7AyQN',
+      clientSecret: '23fd094bfd973ae953010e15ec7b60d3ec393080',
+      repo: 'skyeuq.github.io.gitalk',
+      owner: 'skyeuq',
+      admin: ['skyeuq'],
+      id: '38c281af68246647d4d7cd3e3c5fd9b7',
+      updateCountCallback: commentCount
+    },null))
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async() => {
+    if (typeof Gitalk === 'function') initGitalk()
+    else {
+      await getCSS('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css')
+      await getScript('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js')
+      initGitalk()
+    }
+  }
+  
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  if ('Gitalk' === 'Gitalk' || !false) {
+    if (false) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/dog-conversation.js?1"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="true"></script><script>(() => {
+  const isChatBtn = true
+  const isChatHideShow = false
+
+  if (isChatBtn) {
+    const close = () => {
+      Chatra('minimizeWidget')
+      Chatra('hide')
+    }
+
+    const open = () => {
+      Chatra('openChat', true)
+      Chatra('show')
+    }
+
+    window.ChatraSetup = {
+      startHidden: true
+    }
+  
+    window.chatBtnFn = () => {
+      const isShow = document.getElementById('chatra').classList.contains('chatra--expanded')
+      isShow ? close() : open()
+    }
+  } else if (isChatHideShow) {
+    window.chatBtn = {
+      hide: () => {
+        Chatra('hide')
+      },
+      show: () => {
+        Chatra('show')
+      }
+    }
+  }
+
+  (function(d, w, c) {
+    w.ChatraID = '4LkhtR8HjoFNgaQqK'
+    var s = d.createElement('script')
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments)
+    }
+    s.async = true
+    s.src = 'https://call.chatra.io/chatra.js'
+    if (d.head) d.head.appendChild(s)
+  })(document, window, 'Chatra')
+
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">Search</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  Loading the Database</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":180,"height":250},"mobile":{"show":true},"dialog":{"enable":true},"log":false});</script>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
