@@ -1,0 +1,566 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>深度拷贝、异常、this、防抖与节流 | Skye's Cottage</title><meta name="author" content="Skye Lee"><meta name="copyright" content="Skye Lee"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="深度拷贝 开发时复制一个对象会出现一些问题： 对象的属性值是对象，复制的时候只是复制了引用，修改复制的对象的属性值会影响原对象的属性值。  浅拷贝和深拷贝只针对引用数据类型。   浅拷贝浅拷贝只是复制了对象的引用，修改复制的对象的属性值会影响原对象的属性值。  拷贝对象：Object.assign(&#123;&#125;, obj) 或者 ...obj 拷贝数组：Array.prototype.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度拷贝、异常、this、防抖与节流">
+<meta property="og:url" content="http://example.com/2025/03/21/js/index.html">
+<meta property="og:site_name" content="Skye&#39;s Cottage">
+<meta property="og:description" content="深度拷贝 开发时复制一个对象会出现一些问题： 对象的属性值是对象，复制的时候只是复制了引用，修改复制的对象的属性值会影响原对象的属性值。  浅拷贝和深拷贝只针对引用数据类型。   浅拷贝浅拷贝只是复制了对象的引用，修改复制的对象的属性值会影响原对象的属性值。  拷贝对象：Object.assign(&#123;&#125;, obj) 或者 ...obj 拷贝数组：Array.prototype.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/this.png">
+<meta property="article:published_time" content="2025-03-21T09:44:00.000Z">
+<meta property="article:modified_time" content="2025-03-21T09:48:51.318Z">
+<meta property="article:author" content="Skye Lee">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="深度拷贝">
+<meta property="article:tag" content="防抖与节流">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/this.png"><link rel="shortcut icon" href="/images/cattage.png"><link rel="canonical" href="http://example.com/2025/03/21/js/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found"}},
+  translate: undefined,
+  noticeOutdate: {"limitDay":50,"position":"top","messagePrev":"已经有","messageNext":"天没更新了，戳戳更新😴😴"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '深度拷贝、异常、this、防抖与节流',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-03-21 17:48:51'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/load.css"><link rel="stylesheet" href="/css/wave.css"><link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/macWhite.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><div class="loading-img"></div><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">6</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/images/this.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Skye's Cottage"><img class="site-icon" src="/img/loading.gif" data-original="/images/elephant.png"/><span class="site-name">Skye's Cottage</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">深度拷贝、异常、this、防抖与节流</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-03-21T09:44:00.000Z" title="Created 2025-03-21 17:44:00">2025-03-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-03-21T09:48:51.318Z" title="Updated 2025-03-21 17:48:51">2025-03-21</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="深度拷贝、异常、this、防抖与节流"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">Comments:</span><a href="/2025/03/21/js/#post-comment"><span class="gitalk-comment-count"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"></section><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="98" y="10"></use><use href="#gentle-wave" x="98" y="13"></use><use href="#gentle-wave" x="98" y="15"></use><use href="#gentle-wave" x="98" y="17"></use></g></svg><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" style="background-image: url('/images/this.png')"></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="深度拷贝"><a href="#深度拷贝" class="headerlink" title="深度拷贝"></a>深度拷贝</h2><ul>
+<li><p>开发时复制一个对象会出现一些问题： 对象的属性值是对象，复制的时候只是复制了引用，修改复制的对象的属性值会影响原对象的属性值。</p>
+</li>
+<li><p>浅拷贝和深拷贝只针对引用数据类型。</p>
+</li>
+</ul>
+<h3 id="浅拷贝"><a href="#浅拷贝" class="headerlink" title="浅拷贝"></a>浅拷贝</h3><p>浅拷贝只是复制了对象的引用，修改复制的对象的属性值会影响原对象的属性值。</p>
+<ul>
+<li>拷贝对象：<code>Object.assign(&#123;&#125;, obj)</code> 或者 <code>...obj</code></li>
+<li>拷贝数组：<code>Array.prototype.concat()</code> 或者 <code>[...arr]</code></li>
+</ul>
+<p>但是浅拷贝会存在一些问题，比如拷贝对象的属性值是对象，修改拷贝对象的属性值会影响原对象的属性值。</p>
+<p>因为浅拷贝只拷贝了最外面一层的对象，内部的对象只是拷贝了引用。</p>
+<h3 id="深拷贝"><a href="#深拷贝" class="headerlink" title="深拷贝"></a>深拷贝</h3><p>深拷贝是指完全复制一个对象，即使对象的属性值是对象，修改复制的对象的属性值不会影响原对象的属性值。</p>
+<ol>
+<li><p>通过递归实现</p>
+<ul>
+<li>递归很容易发生栈溢出，所以需要限制递归的深度，加退出条件</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">deepClone</span>(<span class="params">newObj, oldObj</span>) &#123;  <span class="comment">// newObj是新对象，oldObj是旧对象</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> key <span class="keyword">in</span> oldObj) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> oldObj[key] === <span class="string">&#x27;object&#x27;</span>) &#123;</span><br><span class="line">            newObj[key] = oldObj[key] <span class="keyword">instanceof</span> <span class="title class_">Array</span> ? [] : &#123;&#125;</span><br><span class="line">            <span class="title function_">deepClone</span>(newObj[key], oldObj[key])</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            newObj[key] = oldObj[key]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>lodash&#x2F;cloneDeep</p>
+<ul>
+<li>lodash是一个工具库，提供了很多常用的方法，cloneDeep是lodash提供的深拷贝方法</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> _ = <span class="built_in">require</span>(<span class="string">&#x27;lodash&#x27;</span>) </span><br><span class="line"><span class="keyword">const</span> obj = &#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>, <span class="attr">age</span>: <span class="number">18</span>, <span class="attr">friend</span>: &#123;<span class="attr">name</span>: <span class="string">&#x27;Jerry&#x27;</span>, <span class="attr">age</span>: <span class="number">20</span>&#125;&#125;</span><br><span class="line"><span class="keyword">const</span> obj2 = _.<span class="title function_">cloneDeep</span>(obj)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>JSON.stringify()和JSON.parse()</p>
+<ul>
+<li><p>缺点：不能拷贝函数、正则、undefined、symbol</p>
+</li>
+<li><p>优点：简单易用</p>
+</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = &#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>, <span class="attr">age</span>: <span class="number">18</span>, <span class="attr">friend</span>: &#123;<span class="attr">name</span>: <span class="string">&#x27;Jerry&#x27;</span>, <span class="attr">age</span>: <span class="number">20</span>&#125;&#125;</span><br><span class="line"><span class="keyword">const</span> obj2 = <span class="title class_">JSON</span>.<span class="title function_">parse</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(obj))</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><ol>
+<li><p>throw抛异常</p>
+<ul>
+<li>throw抛出异常信息后，程序也会终止执行，后面的代码不会执行。</li>
+<li>Error对象配合throw使用，可以自定义错误信息。</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">divide</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (b === <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;除数不能为0&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>try…catch捕获异常</p>
+<ul>
+<li>拦截错误，提示浏览器提供的错误信息，但是不会终止程序的执行。</li>
+<li>将预估可能发生错误的代码卸载try代码段中</li>
+<li>如果try代码段出现错误后会执行catch代码段，并截获到错误信息</li>
+<li>finally不管是否有错误，都会执行</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">   <span class="keyword">const</span> p = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;p&#x27;</span>)</span><br><span class="line">   p.<span class="property">innerHTML</span> = <span class="string">&#x27;hello&#x27;</span></span><br><span class="line">&#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(e)</span><br><span class="line">    <span class="comment">// throw new Error(&#x27;error&#x27;)  // 如果这里抛出异常，后面的代码不会执行</span></span><br><span class="line">    <span class="comment">// return </span></span><br><span class="line">&#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">  <span class="title function_">alert</span>(<span class="string">&#x27;finally&#x27;</span>)  <span class="comment">// 不管有没有异常，都会执行</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>debugger</p>
+<ul>
+<li>debugger是一个调试工具，可以在代码中设置断点，当代码执行到断点的时候会暂停执行，可以查看变量的值、调用栈等信息。</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">divide</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="keyword">debugger</span> <span class="comment">// 设置断点</span></span><br><span class="line">    <span class="keyword">if</span> (b === <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;除数不能为0&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="处理this"><a href="#处理this" class="headerlink" title="处理this"></a>处理this</h2><h3 id="普通函数的this指向"><a href="#普通函数的this指向" class="headerlink" title="普通函数的this指向"></a>普通函数的this指向</h3><ul>
+<li>普通函数的调用方式决定了this的值，即<strong>谁调用this的值指向谁</strong></li>
+<li>普通函数是没有明确调用者时this的值为window，严格模式下没有调用者时this的值为undefined(‘use strict’)</li>
+</ul>
+<h3 id="箭头函数的this指向"><a href="#箭头函数的this指向" class="headerlink" title="箭头函数的this指向"></a>箭头函数的this指向</h3><ul>
+<li>箭头函数中<strong>不存在this</strong>，箭头函数会默认绑定外层this值，所以在箭头函数中的this值和外层的this值是一样的。</li>
+<li>箭头函数中的this引用的就是最近作用域中的this</li>
+<li>向外层作用域中，一层一层查找this，直到有this的定义</li>
+</ul>
+<p>在开发中，使用箭头函数前需要考虑函数中的this值，事件回调函数使用箭头函数时，this为全局的window，因此DOM事件回调函数如果里面需要DOM对象的this，则不推荐使用箭头函数。</p>
+<p><em><strong>构造函数、原型函数、DOM事件函数等不适用箭头函数</strong></em></p>
+<h3 id="改变this"><a href="#改变this" class="headerlink" title="改变this"></a>改变this</h3><p>下面三个方法可以动态指定普通函数中this的值</p>
+<ol>
+<li><p>call()，使用场景较少</p>
+<ul>
+<li>call()方法调用一个对象，<strong>用另一个对象替换当前对象</strong></li>
+<li>call()方法可以接受多个参数，第一个参数是this的值，后面的参数是函数的参数</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fun.call(thisArg,arg1,arg2)  thisArg是在fun函数运行时指定的this值，arg1,arg2是fun函数的参数，返回值就是fun函数的返回值</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>, a, b)</span><br><span class="line">&#125;</span><br><span class="line">   </span><br><span class="line">fn.<span class="title function_">call</span>(&#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>&#125;, <span class="number">1</span>, <span class="number">2</span>)  <span class="comment">// &#123;name: &#x27;Tom&#x27;&#125; 1 2</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>apply()</p>
+<ul>
+<li>apply()方法和call()方法类似，<strong>区别在于apply()方法接受的是一个数组</strong></li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fun.apply(thisArg,[arg1,arg2])  thisArg是在fun函数运行时指定的this值，[arg1,arg2]是fun函数的参数，返回值就是fun函数的返回值</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>, a, b)</span><br><span class="line">&#125;</span><br><span class="line">   </span><br><span class="line">fn.<span class="title function_">apply</span>(&#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>&#125;, [<span class="number">1</span>, <span class="number">2</span>])  <span class="comment">// &#123;name: &#x27;Tom&#x27;&#125; 1 2</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>bind()</p>
+<ul>
+<li>bind()方法不会调用函数，<strong>返回由指定的this值和初始化参数改造的原函数拷贝（新函数）</strong></li>
+<li>适用于只是想改变this指向，并且不想调用这个函数的时候。</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fun.bind(thisArg,arg1,arg2)  thisArg是在fun函数运行时指定的this值，arg1,arg2是fun函数的参数，返回值是一个函数</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>, a, b)</span><br><span class="line">&#125;</span><br><span class="line">   </span><br><span class="line"><span class="keyword">const</span> newFn = fn.<span class="title function_">bind</span>(&#123;<span class="attr">name</span>: <span class="string">&#x27;Tom&#x27;</span>&#125;, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="title function_">newFn</span>()  <span class="comment">// &#123;name: &#x27;Tom&#x27;&#125; 1 2</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h2><p><img src="/img/loading.gif" data-original="/./images/debounce.png" alt="性能优化"></p>
+<h3 id="防抖-debounce"><a href="#防抖-debounce" class="headerlink" title="防抖 debounce"></a>防抖 debounce</h3><p>单位时间内，频繁触发事件，只执行最后一次。</p>
+<ul>
+<li>使用场景：搜索框搜索输入、手机号、邮箱验证输入检测</li>
+</ul>
+<ol>
+<li><p>lodash库中的debounce方法</p>
+<ul>
+<li>lodash是一个工具库，提供了很多常用的方法，debounce是lodash提供的防抖方法</li>
+<li>第一个参数是函数，第二个参数是延迟时间</li>
+<li>_.debounce(func,[wait&#x3D;0],[option&#x3D;])</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> _ = <span class="built_in">require</span>(<span class="string">&#x27;lodash&#x27;</span>)</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> newFn = _.<span class="title function_">debounce</span>(fn, <span class="number">1000</span>)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>2.手写一个防抖函数</p>
+<ul>
+<li>防抖函数的原理是通过定时器，延迟执行函数，如果在延迟时间内再次触发事件，清除定时器，重新设置定时器。</li>
+</ul>
+   <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">debounce</span>(<span class="params">fn, delay</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> timer = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (timer) &#123;</span><br><span class="line">            <span class="built_in">clearTimeout</span>(timer)</span><br><span class="line">        &#125;</span><br><span class="line">        timer = <span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">            fn.<span class="title function_">apply</span>(<span class="variable language_">this</span>, <span class="variable language_">arguments</span>) <span class="comment">// 保证this指向</span></span><br><span class="line">        &#125;, delay)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="节流-throttle"><a href="#节流-throttle" class="headerlink" title="节流 throttle"></a>节流 throttle</h3><p>单位时间内，频繁触发事件，只执行一次。</p>
+<ul>
+<li>使用场景：页面滚动、尺寸缩放、滚动条等高频事件</li>
+</ul>
+<ol>
+<li><p>lodash库中的throttle方法</p>
+<ul>
+<li>第一个参数是函数，第二个参数是延迟时间</li>
+<li>_.throttle(func,[wait&#x3D;0],[option&#x3D;])</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> _ = <span class="built_in">require</span>(<span class="string">&#x27;lodash&#x27;</span>)</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> newFn = _.<span class="title function_">throttle</span>(fn, <span class="number">1000</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>手写一个节流函数</p>
+<ul>
+<li>节流函数的原理是通过定时器，延迟执行函数，如果在延迟时间内再次触发事件，不执行函数。</li>
+</ul>
+ <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">throttle</span>(<span class="params">fn, delay</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> timer = <span class="literal">null</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!timer) &#123;</span><br><span class="line">            timer = <span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">                fn.<span class="title function_">apply</span>(<span class="variable language_">this</span>, <span class="variable language_">arguments</span>) <span class="comment">// 保证this指向</span></span><br><span class="line">                timer = <span class="literal">null</span>  <span class="comment">// 在setTimeout中无法删除定时器，因为定时器还在运作，不能用clearTimeout删除。</span></span><br><span class="line">            &#125;, delay)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<blockquote>
+<h2 id="typeof、instanceof、Object-prototype-toString-call-三者区别"><a href="#typeof、instanceof、Object-prototype-toString-call-三者区别" class="headerlink" title="typeof、instanceof、Object.prototype.toString.call() 三者区别"></a>typeof、instanceof、Object.prototype.toString.call() 三者区别</h2><h3 id="1-✅-typeof"><a href="#1-✅-typeof" class="headerlink" title="1. ✅ typeof"></a>1. ✅ <code>typeof</code></h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typeof</span> <span class="number">1</span>           <span class="comment">// &quot;number&quot;</span></span><br><span class="line"><span class="keyword">typeof</span> <span class="string">&#x27;hello&#x27;</span>     <span class="comment">// &quot;string&quot;</span></span><br><span class="line"><span class="keyword">typeof</span> <span class="literal">null</span>        <span class="comment">// &quot;object&quot; ❌（历史遗留）</span></span><br><span class="line"><span class="keyword">typeof</span> <span class="literal">undefined</span>   <span class="comment">// &quot;undefined&quot;</span></span><br><span class="line"><span class="keyword">typeof</span> []          <span class="comment">// &quot;object&quot;</span></span><br><span class="line"><span class="keyword">typeof</span> &#123;&#125;          <span class="comment">// &quot;object&quot;</span></span><br><span class="line"><span class="title function_">typeof</span> () =&gt; &#123;&#125;    <span class="comment">// &quot;function&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>不适合判断复杂对象类型（如数组、正则、日期等）</p>
+</blockquote>
+<hr>
+<h3 id="2-✅-instanceof"><a href="#2-✅-instanceof" class="headerlink" title="2. ✅ instanceof"></a>2. ✅ <code>instanceof</code></h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[] <span class="keyword">instanceof</span> <span class="title class_">Array</span>            <span class="comment">// true</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Date</span>() <span class="keyword">instanceof</span> <span class="title class_">Date</span>     <span class="comment">// true</span></span><br><span class="line">(&#123;&#125;) <span class="keyword">instanceof</span> <span class="title class_">Object</span>         <span class="comment">// true</span></span><br><span class="line"><span class="string">&quot;abc&quot;</span> <span class="keyword">instanceof</span> <span class="title class_">String</span>        <span class="comment">// false（因为是原始值）</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">String</span>(<span class="string">&quot;abc&quot;</span>) <span class="keyword">instanceof</span> <span class="title class_">String</span> <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>原理：沿着 <code>value.__proto__</code> 一直向上找，看是否能找到 <code>Constructor.prototype</code></p>
+</blockquote>
+<p>⚠️ <strong>注意</strong>：</p>
+<ul>
+<li>基本类型（如字符串）不是对象，不适用</li>
+<li>在跨 iframe&#x2F;窗口场景中 <code>instanceof</code> 判断会失效，因为构造函数不同</li>
+</ul>
+<hr>
+<h3 id="3-✅-Object-prototype-toString-call-value"><a href="#3-✅-Object-prototype-toString-call-value" class="headerlink" title="3. ✅ Object.prototype.toString.call(value)"></a>3. ✅ <code>Object.prototype.toString.call(value)</code></h3><p>这是最强大、最精准的方法，能判断几乎所有类型。</p>
+<h3 id="📌-常见类型返回值对照表："><a href="#📌-常见类型返回值对照表：" class="headerlink" title="📌 常见类型返回值对照表："></a>📌 常见类型返回值对照表：</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>返回结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>undefined</code></td>
+<td><code>[object Undefined]</code></td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td><code>[object Null]</code></td>
+</tr>
+<tr>
+<td><code>Boolean</code></td>
+<td><code>[object Boolean]</code></td>
+</tr>
+<tr>
+<td><code>Number</code></td>
+<td><code>[object Number]</code></td>
+</tr>
+<tr>
+<td><code>String</code></td>
+<td><code>[object String]</code></td>
+</tr>
+<tr>
+<td><code>Symbol</code></td>
+<td><code>[object Symbol]</code></td>
+</tr>
+<tr>
+<td><code>BigInt</code></td>
+<td><code>[object BigInt]</code></td>
+</tr>
+<tr>
+<td><code>Object</code></td>
+<td><code>[object Object]</code></td>
+</tr>
+<tr>
+<td><code>Array</code></td>
+<td><code>[object Array]</code></td>
+</tr>
+<tr>
+<td><code>Function</code></td>
+<td><code>[object Function]</code></td>
+</tr>
+<tr>
+<td><code>Date</code></td>
+<td><code>[object Date]</code></td>
+</tr>
+<tr>
+<td><code>RegExp</code></td>
+<td><code>[object RegExp]</code></td>
+</tr>
+<tr>
+<td><code>Error</code></td>
+<td><code>[object Error]</code></td>
+</tr>
+<tr>
+<td><code>Map</code></td>
+<td><code>[object Map]</code></td>
+</tr>
+<tr>
+<td><code>Set</code></td>
+<td><code>[object Set]</code></td>
+</tr>
+<tr>
+<td><code>WeakMap</code></td>
+<td><code>[object WeakMap]</code></td>
+</tr>
+<tr>
+<td><code>WeakSet</code></td>
+<td><code>[object WeakSet]</code></td>
+</tr>
+<tr>
+<td><code>Promise</code></td>
+<td><code>[object Promise]</code></td>
+</tr>
+<tr>
+<td><code>Arguments</code></td>
+<td><code>[object Arguments]</code></td>
+</tr>
+<tr>
+<td><code>Int8Array</code></td>
+<td><code>[object Int8Array]</code></td>
+</tr>
+<tr>
+<td><code>Uint8Array</code></td>
+<td><code>[object Uint8Array]</code></td>
+</tr>
+<tr>
+<td><code>ArrayBuffer</code></td>
+<td><code>[object ArrayBuffer]</code></td>
+</tr>
+</tbody></table>
+<h3 id="✅-使用方式封装："><a href="#✅-使用方式封装：" class="headerlink" title="✅ 使用方式封装："></a>✅ 使用方式封装：</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">getType</span>(<span class="params">value</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">toString</span>.<span class="title function_">call</span>(value).<span class="title function_">slice</span>(<span class="number">8</span>, -<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">getType</span>([])          <span class="comment">// &quot;Array&quot;</span></span><br><span class="line"><span class="title function_">getType</span>(<span class="literal">null</span>)        <span class="comment">// &quot;Null&quot;</span></span><br><span class="line"><span class="title function_">getType</span>(<span class="function">() =&gt;</span> &#123;&#125;)    <span class="comment">// &quot;Function&quot;</span></span><br><span class="line"><span class="title function_">getType</span>(<span class="keyword">new</span> <span class="title class_">Map</span>())   <span class="comment">// &quot;Map&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="4-✅-constructor"><a href="#4-✅-constructor" class="headerlink" title="4. ✅ constructor"></a>4. ✅ <code>constructor</code></h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">123</span>).<span class="property">constructor</span> === <span class="title class_">Number</span>        <span class="comment">// true</span></span><br><span class="line">(<span class="string">&quot;abc&quot;</span>).<span class="property">constructor</span> === <span class="title class_">String</span>      <span class="comment">// true</span></span><br><span class="line">(&#123;&#125;).<span class="property">constructor</span> === <span class="title class_">Object</span>         <span class="comment">// true</span></span><br><span class="line">([]).<span class="property">constructor</span> === <span class="title class_">Array</span>          <span class="comment">// true</span></span><br><span class="line">(<span class="keyword">new</span> <span class="title class_">Date</span>()).<span class="property">constructor</span> === <span class="title class_">Date</span>   <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>⚠️ 缺点：</p>
+<ul>
+<li><code>constructor</code> 可被人为修改（不安全）</li>
+<li>某些特殊对象可能没有 <code>constructor</code> 属性</li>
+</ul>
+<hr>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">Skye Lee</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2025/03/21/js/">http://example.com/2025/03/21/js/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E6%8B%B7%E8%B4%9D/">深度拷贝</a><a class="post-meta__tags" href="/tags/%E9%98%B2%E6%8A%96%E4%B8%8E%E8%8A%82%E6%B5%81/">防抖与节流</a></div><div class="post_share"><div class="social-share" data-image="/images/this.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2025/03/21/constructor/" title="JS构造函数及原型"><img class="cover" src="/img/loading.gif" data-original="/images/proto.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">JS构造函数及原型</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2025/03/18/bomStudy/" title="Web APIs学习 --BOM（三）"><img class="cover" src="/img/loading.gif" data-original="/images/bom.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="title">Web APIs学习 --BOM（三）</div></div></a></div><div><a href="/2025/03/19/jsScope/" title="JavaScript作用域"><img class="cover" src="/img/loading.gif" data-original="/images/scope.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-19</div><div class="title">JavaScript作用域</div></div></a></div><div><a href="/2025/03/10/jsStudy/" title="JavaScript基础语法学习"><img class="cover" src="/img/loading.gif" data-original="/images/ecma.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-10</div><div class="title">JavaScript基础语法学习</div></div></a></div><div><a href="/2025/03/03/jsasync/" title="JavaScript异步编程"><img class="cover" src="/img/loading.gif" data-original="/images/js.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-03</div><div class="title">JavaScript异步编程</div></div></a></div><div><a href="/2025/03/18/domStudy2/" title="Web APIs学习 --DOM（二）"><img class="cover" src="/img/loading.gif" data-original="/images/dom3.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="title">Web APIs学习 --DOM（二）</div></div></a></div><div><a href="/2025/03/18/reg/" title="正则表达式"><img class="cover" src="/img/loading.gif" data-original="/images/reg.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-18</div><div class="title">正则表达式</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Skye Lee</div><div class="author-info__description">Ordinary but also want to be elegant...</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/skyeuq"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/skyeuq" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:skyelll991@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">HAVE A MAGIC DAY!!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B1%E5%BA%A6%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.</span> <span class="toc-text">深度拷贝</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.1.</span> <span class="toc-text">浅拷贝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B1%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.2.</span> <span class="toc-text">深拷贝</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">异常处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%84%E7%90%86this"><span class="toc-number">3.</span> <span class="toc-text">处理this</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%99%AE%E9%80%9A%E5%87%BD%E6%95%B0%E7%9A%84this%E6%8C%87%E5%90%91"><span class="toc-number">3.1.</span> <span class="toc-text">普通函数的this指向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0%E7%9A%84this%E6%8C%87%E5%90%91"><span class="toc-number">3.2.</span> <span class="toc-text">箭头函数的this指向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%B9%E5%8F%98this"><span class="toc-number">3.3.</span> <span class="toc-text">改变this</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="toc-number">4.</span> <span class="toc-text">性能优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B2%E6%8A%96-debounce"><span class="toc-number">4.1.</span> <span class="toc-text">防抖 debounce</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8A%82%E6%B5%81-throttle"><span class="toc-number">4.2.</span> <span class="toc-text">节流 throttle</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#typeof%E3%80%81instanceof%E3%80%81Object-prototype-toString-call-%E4%B8%89%E8%80%85%E5%8C%BA%E5%88%AB"><span class="toc-number">5.</span> <span class="toc-text">typeof、instanceof、Object.prototype.toString.call() 三者区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E2%9C%85-typeof"><span class="toc-number">5.1.</span> <span class="toc-text">1. ✅ typeof</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E2%9C%85-instanceof"><span class="toc-number">5.2.</span> <span class="toc-text">2. ✅ instanceof</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E2%9C%85-Object-prototype-toString-call-value"><span class="toc-number">5.3.</span> <span class="toc-text">3. ✅ Object.prototype.toString.call(value)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%93%8C-%E5%B8%B8%E8%A7%81%E7%B1%BB%E5%9E%8B%E8%BF%94%E5%9B%9E%E5%80%BC%E5%AF%B9%E7%85%A7%E8%A1%A8%EF%BC%9A"><span class="toc-number">5.4.</span> <span class="toc-text">📌 常见类型返回值对照表：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9C%85-%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F%E5%B0%81%E8%A3%85%EF%BC%9A"><span class="toc-number">5.5.</span> <span class="toc-text">✅ 使用方式封装：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E2%9C%85-constructor"><span class="toc-number">5.6.</span> <span class="toc-text">4. ✅ constructor</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/03/21/js/" title="深度拷贝、异常、this、防抖与节流"><img src="/img/loading.gif" data-original="/images/this.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度拷贝、异常、this、防抖与节流"/></a><div class="content"><a class="title" href="/2025/03/21/js/" title="深度拷贝、异常、this、防抖与节流">深度拷贝、异常、this、防抖与节流</a><time datetime="2025-03-21T09:44:00.000Z" title="Created 2025-03-21 17:44:00">2025-03-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/21/constructor/" title="JS构造函数及原型"><img src="/img/loading.gif" data-original="/images/proto.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="JS构造函数及原型"/></a><div class="content"><a class="title" href="/2025/03/21/constructor/" title="JS构造函数及原型">JS构造函数及原型</a><time datetime="2025-03-21T04:33:28.000Z" title="Created 2025-03-21 12:33:28">2025-03-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/19/jsStudy4/" title="JS函数、解构赋值"><img src="/img/loading.gif" data-original="/images/js3.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="JS函数、解构赋值"/></a><div class="content"><a class="title" href="/2025/03/19/jsStudy4/" title="JS函数、解构赋值">JS函数、解构赋值</a><time datetime="2025-03-19T08:10:18.000Z" title="Created 2025-03-19 16:10:18">2025-03-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/19/jsScope/" title="JavaScript作用域"><img src="/img/loading.gif" data-original="/images/scope.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="JavaScript作用域"/></a><div class="content"><a class="title" href="/2025/03/19/jsScope/" title="JavaScript作用域">JavaScript作用域</a><time datetime="2025-03-19T05:54:13.000Z" title="Created 2025-03-19 13:54:13">2025-03-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/18/reg/" title="正则表达式"><img src="/img/loading.gif" data-original="/images/reg.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="正则表达式"/></a><div class="content"><a class="title" href="/2025/03/18/reg/" title="正则表达式">正则表达式</a><time datetime="2025-03-18T11:19:54.000Z" title="Created 2025-03-18 19:19:54">2025-03-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/images/this.png')"><div id="footer-wrap"><div class="copyright">&copy;2024 - 2025 By Skye Lee</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="Chat"><i class="fas fa-sms"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initGitalk = () => {
+    const gitalk = new Gitalk(Object.assign({
+      clientID: 'Ov23liATZoHp5oR7AyQN',
+      clientSecret: '23fd094bfd973ae953010e15ec7b60d3ec393080',
+      repo: 'skyeuq.github.io.gitalk',
+      owner: 'skyeuq',
+      admin: ['skyeuq'],
+      id: '7352d7e85739524177293a316b74f8f8',
+      updateCountCallback: commentCount
+    },null))
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async() => {
+    if (typeof Gitalk === 'function') initGitalk()
+    else {
+      await getCSS('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css')
+      await getScript('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js')
+      initGitalk()
+    }
+  }
+  
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  if ('Gitalk' === 'Gitalk' || !false) {
+    if (false) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/dog-conversation.js?1"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="true"></script><script>(() => {
+  const isChatBtn = true
+  const isChatHideShow = false
+
+  if (isChatBtn) {
+    const close = () => {
+      Chatra('minimizeWidget')
+      Chatra('hide')
+    }
+
+    const open = () => {
+      Chatra('openChat', true)
+      Chatra('show')
+    }
+
+    window.ChatraSetup = {
+      startHidden: true
+    }
+  
+    window.chatBtnFn = () => {
+      const isShow = document.getElementById('chatra').classList.contains('chatra--expanded')
+      isShow ? close() : open()
+    }
+  } else if (isChatHideShow) {
+    window.chatBtn = {
+      hide: () => {
+        Chatra('hide')
+      },
+      show: () => {
+        Chatra('show')
+      }
+    }
+  }
+
+  (function(d, w, c) {
+    w.ChatraID = '4LkhtR8HjoFNgaQqK'
+    var s = d.createElement('script')
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments)
+    }
+    s.async = true
+    s.src = 'https://call.chatra.io/chatra.js'
+    if (d.head) d.head.appendChild(s)
+  })(document, window, 'Chatra')
+
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">Search</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  Loading the Database</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":180,"height":250},"mobile":{"show":true},"dialog":{"enable":true},"log":false});</script></body></html>
