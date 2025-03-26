@@ -1,0 +1,513 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>关于跨域... | Skye's Cottage</title><meta name="author" content="Skye Lee"><meta name="copyright" content="Skye Lee"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="今天整理一些有关于跨域的内容… 为什么需要跨域？浏览器实施同源策略，这是一种基本的安全协议。该策略禁止来自不同域的JavaScript脚本与另一个域的资源进行交互。 其中，同源是指两个URL的协议、主机和端口号都一致  为什么浏览器需要这种限制呢？“同源策略”是浏览器的安全机制，其目的是：防止恶意网站读取你登录状态下的敏感信息（如银行、邮件、后台管理等）。举个例子：你在 bank.com 登录了账">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于跨域...">
+<meta property="og:url" content="http://example.com/2025/03/24/cors/index.html">
+<meta property="og:site_name" content="Skye&#39;s Cottage">
+<meta property="og:description" content="今天整理一些有关于跨域的内容… 为什么需要跨域？浏览器实施同源策略，这是一种基本的安全协议。该策略禁止来自不同域的JavaScript脚本与另一个域的资源进行交互。 其中，同源是指两个URL的协议、主机和端口号都一致  为什么浏览器需要这种限制呢？“同源策略”是浏览器的安全机制，其目的是：防止恶意网站读取你登录状态下的敏感信息（如银行、邮件、后台管理等）。举个例子：你在 bank.com 登录了账">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/cors.png">
+<meta property="article:published_time" content="2025-03-24T08:01:31.000Z">
+<meta property="article:modified_time" content="2025-03-24T08:07:42.383Z">
+<meta property="article:author" content="Skye Lee">
+<meta property="article:tag" content="跨域，HTTP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/cors.png"><link rel="shortcut icon" href="/images/cattage.png"><link rel="canonical" href="http://example.com/2025/03/24/cors/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found"}},
+  translate: undefined,
+  noticeOutdate: {"limitDay":50,"position":"top","messagePrev":"已经有","messageNext":"天没更新了，戳戳更新😴😴"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '关于跨域...',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-03-24 16:07:42'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/load.css"><link rel="stylesheet" href="/css/wave.css"><link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/macWhite.css"><script src="/live2d-widget/autoload.js"></script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><div class="loading-img"></div><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+
+if (false) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">22</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">7</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/images/cors.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Skye's Cottage"><img class="site-icon" src="/img/loading.gif" data-original="/images/elephant.png"/><span class="site-name">Skye's Cottage</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> Blog</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> friend Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">关于跨域...</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-03-24T08:01:31.000Z" title="Created 2025-03-24 16:01:31">2025-03-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-03-24T08:07:42.383Z" title="Updated 2025-03-24 16:07:42">2025-03-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="关于跨域..."><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">Comments:</span><a href="/2025/03/24/cors/#post-comment"><span class="gitalk-comment-count"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"></section><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="98" y="10"></use><use href="#gentle-wave" x="98" y="13"></use><use href="#gentle-wave" x="98" y="15"></use><use href="#gentle-wave" x="98" y="17"></use></g></svg><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" style="background-image: url('/images/cors.png')"></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>今天整理一些有关于跨域的内容…</p>
+<h2 id="为什么需要跨域？"><a href="#为什么需要跨域？" class="headerlink" title="为什么需要跨域？"></a>为什么需要跨域？</h2><p>浏览器实施同源策略，这是一种基本的安全协议。该策略禁止来自不同域的JavaScript脚本与另一个域的资源进行交互。</p>
+<p>其中，同源是指<strong>两个URL的协议、主机和端口号都一致</strong></p>
+<blockquote>
+<p>为什么浏览器需要这种限制呢？<br>“同源策略”是浏览器的安全机制，其目的是：<br>防止恶意网站读取你登录状态下的敏感信息（如银行、邮件、后台管理等）。<br>举个例子：<br>你在 bank.com 登录了账户，浏览器存有 cookie。如果没有同源限制，恶意网站 evil.com 可以伪造请求读取你的银行账户信息，这就是“跨站请求伪造（CSRF）”的根源之一。</p>
+</blockquote>
+<p>跨域是指<strong>当前网页的源和要请求的目标接口的源不一致</strong></p>
+<p>由于浏览器同源策略的限制，将存在以下的跨域问题：</p>
+<ol>
+<li>无法访问来自不同源网页的Cookie、LocalStorage和IndexedDB，也就是说不同源的网页之间不能共享存储数据</li>
+<li>无法操作不同源网页的DOM，每个网页的DOM只能由其自己的脚本访问，不能被其他源的脚本操作。</li>
+<li>无法向不同源地址发起AJAX请求，这限制了网页与不同源服务器之间的数据交互。</li>
+</ol>
+<p>这些限制在确保Web应用安全性防止恶意网站访问其他网站的敏感数据，但同时也给开发跨域Web应用带来了挑战。</p>
+<p>相应的解决方案有：</p>
+<h2 id="1-JSONP"><a href="#1-JSONP" class="headerlink" title="1.JSONP"></a>1.JSONP</h2><p>浏览器对<code>&lt;script&gt;</code>标签没有跨域限制，通过动态创建script标签，请求后端返回可执行的代码。</p>
+<p><em><strong>只支持GET请求</strong></em>,使用于一些旧项目，无法配置CORS的第三方服务。</p>
+<p>前端代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">handleResponse</span>(<span class="params">data</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;跨域数据：&#x27;</span>, data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> script = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&#x27;script&#x27;</span>);</span><br><span class="line">    script.<span class="property">src</span> = <span class="string">&#x27;http://example.com/data?callback=handleResponse&#x27;</span>;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="property">body</span>.<span class="title function_">appendChild</span>(script);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>后端返回</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">handleResponse(&#123; name: &quot;OpenAI&quot;, type: &quot;AI&quot; &#125;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>也就是在请求的时候不仅要写接口路径，还要加一个回调函数名，并将完整的路径写入script的src中，后端返回数据的时候将函数名与内容拼接，这样就可以直接对返回的内容进行操作了。</p>
+</blockquote>
+<h2 id="2-document-domain"><a href="#2-document-domain" class="headerlink" title="2.document.domain"></a>2.document.domain</h2><p>两个页面可以<strong>设置相同的document.domain</strong>，浏览器是通过这个属性来检查两个页面是否同源，只要设置相同的document.domain，两个页面就可以共享Cookie。</p>
+<p>但是仅限于<strong>主域相同，子域不同</strong>的跨应用场景。比如a.example.com和b.example.com</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.example.com 和 b.example.com</span></span><br><span class="line"><span class="variable language_">document</span>.<span class="property">domain</span> = <span class="string">&quot;example.com&quot;</span>; <span class="comment">// 都设置为主域</span></span><br></pre></td></tr></table></figure>
+
+<p>此时两个页面就可以互相访问DOM和JS了。逐渐被淘汰了。</p>
+<h2 id="3-CORS"><a href="#3-CORS" class="headerlink" title="3.CORS"></a>3.CORS</h2><p>跨资源共享标准新增了一组HTTP标头字段，允许<strong>服务器声明</strong>哪些源站通过浏览器有权限访问哪些资源。</p>
+<p>对于可能对服务器数据产生副作用的HTTP请求方法，浏览器必须先使用<strong>OPTIONS</strong>方法发起一个预检请求，从而获知服务器<strong>是否允许该跨源请求</strong>。服务器允许后，才发起实际的HTTP请求。</p>
+<p>在预检请求的返回中，服务端也可以通知客户端是否需要携带身份凭证。</p>
+<p>CORS请求失败会产生错误，但是为了安全，在JS代码层面<strong>无法获知到底具体是哪里出现了问题</strong>，只能在浏览器的控制台得知。</p>
+<h3 id="简单请求是指不会触发CORS预检请求的请求，"><a href="#简单请求是指不会触发CORS预检请求的请求，" class="headerlink" title="简单请求是指不会触发CORS预检请求的请求，"></a><strong>简单请求</strong>是指不会触发CORS预检请求的请求，</h3><p>需要满足以下条件：</p>
+<ul>
+<li>GET、HEAD、POST</li>
+<li>除了被用户代理自动设置的标头字段，允许人为设置的字段为Fetch规范定义的对CORS安全的标头字段集合（Accept、Accept-Language、Content-Language、Content-Type、Range）</li>
+<li>Content-Type标头所指定的媒体类型仅限于：text&#x2F;plain、multipart&#x2F;form-data、application&#x2F;x-www-form-urlencoded</li>
+<li>如果是使用<code>XMLHttpRequest</code>对象发出的请求，在返回的XMLHttpRequest.upload 对象属性上没有注册任何事件监听器</li>
+<li>请求中没有使用 ReadableStream 对象。</li>
+</ul>
+<p>假如说站点<code>https://foo.example</code>的网页应用想要访问<code>https://bar.other</code>的资源。这个时候，浏览器发送给服务器的请求报文可能如下所示：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/resources/public-data/</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>bar.other</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-us,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip,deflate</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>https://foo.example</span><br></pre></td></tr></table></figure>
+
+<p><strong>其中的Origin表明该请求来源于<code>https://foo.example</code></strong></p>
+<p>而服务器的响应如下所示：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Date</span><span class="punctuation">: </span>Mon, 01 Dec 2008 00:23:53 GMT</span><br><span class="line"><span class="attribute">Server</span><span class="punctuation">: </span>Apache/2</span><br><span class="line"><span class="attribute">Access-Control-Allow-Origin</span><span class="punctuation">: </span>*</span><br><span class="line"><span class="attribute">Keep-Alive</span><span class="punctuation">: </span>timeout=2, max=100</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>Keep-Alive</span><br><span class="line"><span class="attribute">Transfer-Encoding</span><span class="punctuation">: </span>chunked</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/xml</span><br><span class="line"></span><br><span class="line"><span class="language-crmsh">[…<span class="keyword">XML</span> <span class="title">Data</span>…]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>其中，服务端返回的<code>Access-Control-Allow-Origin: *</code>值表明，该资源可以被任意外源访问。</strong></p>
+<h3 id="预检请求可以避免跨域请求对服务器的用户数据产生未预期的影响"><a href="#预检请求可以避免跨域请求对服务器的用户数据产生未预期的影响" class="headerlink" title="预检请求可以避免跨域请求对服务器的用户数据产生未预期的影响"></a><strong>预检请求</strong>可以避免跨域请求对服务器的用户数据产生未预期的影响</h3><p>与简单请求不同的是，“需预检的请求”要求必须首先使用 OPTIONS 方法发起一个预检请求到服务器，以获知服务器是否允许该实际请求。</p>
+<p>比如，以下是一个<strong>需要执行预检请求的HTTP请求</strong>,该请求包含了一个非标准的HTTP<code>X-PINGOTHRT</code><br>请求标头，请求的Content-Type为application&#x2F;xml，所以要发起预检请求。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fetchPromise = <span class="title function_">fetch</span>(<span class="string">&quot;https://bar.other/doc&quot;</span>, &#123;</span><br><span class="line">    <span class="attr">method</span>: <span class="string">&quot;POST&quot;</span>,</span><br><span class="line">    <span class="attr">mode</span>: <span class="string">&quot;cors&quot;</span>,</span><br><span class="line">    <span class="attr">headers</span>: &#123;</span><br><span class="line">        <span class="string">&quot;Content-Type&quot;</span>: <span class="string">&quot;text/xml&quot;</span>,</span><br><span class="line">        <span class="string">&quot;X-PINGOTHER&quot;</span>: <span class="string">&quot;pingpong&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">body</span>: <span class="string">&quot;&lt;person&gt;&lt;name&gt;Arun&lt;/name&gt;&lt;/person&gt;&quot;</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">fetchPromise.<span class="title function_">then</span>(<span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(response.<span class="property">status</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>首先是预检请求&#x2F;响应</strong></p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">OPTIONS</span> <span class="string">/doc</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>bar.other</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-us,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip,deflate</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>https://foo.example</span><br><span class="line"><span class="attribute">Access-Control-Request-Method</span><span class="punctuation">: </span>POST</span><br><span class="line"><span class="attribute">Access-Control-Request-Headers</span><span class="punctuation">: </span>X-PINGOTHER, Content-Type</span><br><span class="line"></span><br><span class="line"><span class="language-http"><span class="meta">HTTP/1.1</span> <span class="number">204</span> No Content</span></span><br><span class="line"><span class="language-http"><span class="attribute">Date</span><span class="punctuation">: </span>Mon, 01 Dec 2008 01:15:39 GMT</span></span><br><span class="line"><span class="language-http"><span class="attribute">Server</span><span class="punctuation">: </span>Apache/2</span></span><br><span class="line"><span class="language-http"><span class="attribute">Access-Control-Allow-Origin</span><span class="punctuation">: </span>https://foo.example</span></span><br><span class="line"><span class="language-http"><span class="attribute">Access-Control-Allow-Methods</span><span class="punctuation">: </span>POST, GET, OPTIONS</span></span><br><span class="line"><span class="language-http"><span class="attribute">Access-Control-Allow-Headers</span><span class="punctuation">: </span>X-PINGOTHER, Content-Type</span></span><br><span class="line"><span class="language-http"><span class="attribute">Access-Control-Max-Age</span><span class="punctuation">: </span>86400</span></span><br><span class="line"><span class="language-http"><span class="attribute">Vary</span><span class="punctuation">: </span>Accept-Encoding, Origin</span></span><br><span class="line"><span class="language-http"><span class="attribute">Keep-Alive</span><span class="punctuation">: </span>timeout=2, max=100</span></span><br><span class="line"><span class="language-http"><span class="attribute">Connection</span><span class="punctuation">: </span>Keep-Alive</span></span><br></pre></td></tr></table></figure>
+
+<p>其中OPTIONS请求中携带了两个标头字段</p>
+<ul>
+<li><strong>Access-Control-Request-Method: POST</strong>，告知服务器实际请求将用POST方法。</li>
+<li><strong>Access-Control-Request-Headers: X-PINGOTHER, Content-Type</strong>，告知服务器实际请求将携带两个自定义请求标头字段。</li>
+</ul>
+<p>服务器的响应中写明了<strong>允许的源域、允许的请求方法、允许的标头</strong>，最后的Access-Control-Max-Age给定了该预检请求<strong>可供缓存的的事件长短</strong>，默认5秒，在有效时间内，浏览器不需要为同一请求再次发起预检请求。</p>
+<blockquote>
+<p>浏览器自身维护一个最大有效时间，如果超过最大有效时间将不会生效。</p>
+</blockquote>
+<p>预检请求完成之后，将发送实际请求:</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/doc</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>bar.other</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-us,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip,deflate</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">X-PINGOTHER</span><span class="punctuation">: </span>pingpong</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/xml; charset=UTF-8</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>https://foo.example/examples/preflightInvocation.html</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>55</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>https://foo.example</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-cache</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql">&lt;person&gt;&lt;<span class="type">name</span>&gt;Arun&lt;/<span class="type">name</span>&gt;&lt;/person&gt;</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">HTTP/<span class="number">1.1</span> <span class="number">200</span> OK</span></span><br><span class="line"><span class="language-pgsql"><span class="type">Date</span>: Mon, <span class="number">01</span> <span class="type">Dec</span> <span class="number">2008</span> <span class="number">01</span>:<span class="number">15</span>:<span class="number">40</span> GMT</span></span><br><span class="line"><span class="language-pgsql"><span class="keyword">Server</span>: Apache/<span class="number">2</span></span></span><br><span class="line"><span class="language-pgsql"><span class="keyword">Access</span>-Control-Allow-Origin: https://foo.example</span></span><br><span class="line"><span class="language-pgsql">Vary: Accept-<span class="keyword">Encoding</span>, Origin</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Encoding</span>: gzip</span></span><br><span class="line"><span class="language-pgsql">Content-Length: <span class="number">235</span></span></span><br><span class="line"><span class="language-pgsql">Keep-Alive: timeout=<span class="number">2</span>, max=<span class="number">99</span></span></span><br><span class="line"><span class="language-pgsql"><span class="keyword">Connection</span>: Keep-Alive</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">[<span class="keyword">Some</span> <span class="type">XML</span> payload]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>但是如果预检请求发生了重定向，一部分浏览器会报错</strong>，解决办法有：</p>
+<ol>
+<li>在服务端去掉对预检请求的重定向</li>
+<li>将实际请求变成一个简单请求</li>
+<li>发出一个简单请求判断真正的预检请求会返回什么地址，然后发送另一个请求在上一步通过response.url获得的URL</li>
+</ol>
+<p><em><strong>但是如果请求是由于存在Authorization字段而引发了预检请求，则这一方法无法使用</strong></em></p>
+<h3 id="附带身份凭证的请求"><a href="#附带身份凭证的请求" class="headerlink" title="附带身份凭证的请求"></a>附带身份凭证的请求</h3><p>一般而言，对于跨源的XMLHttpRequest或Fetch请求，浏览器<strong>不会发送身份凭证信息</strong><br>，如果要发送，需要设置XMLHttpRequest对象的某个特殊标志位，或在构造Request对象时设置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> url = <span class="string">&quot;https://bar.other/resources/credentialed-content/&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> request = <span class="keyword">new</span> <span class="title class_">Request</span>(url, &#123;<span class="attr">credentials</span>: <span class="string">&quot;include&quot;</span>&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fetchPromise = <span class="title function_">fetch</span>(request);</span><br><span class="line">fetchPromise.<span class="title function_">then</span>(<span class="function">(<span class="params">response</span>) =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(response));</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码构造了一个Request对象，并在构造器中<strong>将credentials选项设置为”include”<strong>，但是浏览器会</strong>拒绝任何不带<code>Access-Control-Allow-Credentials: true</code>标头的响应，且不会把响应提供给调用的网页内容</strong></p>
+<p><em><strong>预检请求不能包含凭据，预检请求的响应必须指定<code>Access-Control-Allow-Credentials: true</code>来表明可以携带凭据进行实际的请求。</strong></em></p>
+<p>在响应附带身份凭证的请求时，</p>
+<ol>
+<li>服务器<strong>不能</strong>将Access-Control-Allow-Origin 的值设为通配符“*”。</li>
+<li>服务器<strong>不能</strong>将 Access-Control-Allow-Headers 的值设为通配符“*”。</li>
+<li>服务器<strong>不能</strong>将 Access-Control-Allow-Methods 的值设为通配符“*”。</li>
+</ol>
+<h3 id="整理标头字段"><a href="#整理标头字段" class="headerlink" title="整理标头字段"></a>整理标头字段</h3><p>响应标头字段：</p>
+<ol>
+<li>Access-Control-Allow-Origin</li>
+<li>Access-Control-Expose-Headers：指定标头放入允许列表中</li>
+<li>Access-Control-Max-Age</li>
+<li>Access-Control-Allow-Credentials</li>
+<li>Access-Control-Allow-Methods</li>
+<li>Access-Control-Allow-Headers</li>
+</ol>
+<p>请求标头字段：</p>
+<ol>
+<li>Origin</li>
+<li>Access-Control-Request-Method</li>
+<li>Access-Control-Request-Headers</li>
+</ol>
+<blockquote>
+<p>感觉这部分内容有一些难理解，做一个小小的类比…</p>
+<p>你正在网站 <a target="_blank" rel="noopener" href="https://foo.example/">https://foo.example</a> 上写前端代码，你的代码像一个“游客”，想去另一个国家 <a target="_blank" rel="noopener" href="https://bar.api.com/">https://bar.api.com</a></p>
+<p>获取一些资源（比如用户数据、图片、JSON 数据等）。这就是一个跨域请求（因为两个域名不一样）。</p>
+<p>浏览器是“边境警察”，负责检查这个请求是否合法。</p>
+<p><strong>🎬 第一幕：简单请求 —— 小事一桩，直接放行</strong></p>
+<p>你的小代码只是用 GET 或 POST 方法访问接口，也没有带什么奇怪的行李（特殊 header 或 JSON 内容），这时候警察觉得：</p>
+<p><em><strong>“嗯，你是个正常游客，看起来不危险。”</strong></em></p>
+<p>于是浏览器直接放你过去，但是提醒你一句：</p>
+<p><em><strong>“你可以去，但是我还得看看对面国家（服务器）愿不愿意接你。”</strong></em></p>
+<p>然后浏览器就在请求里加一个身份说明：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>https://foo.example</span><br></pre></td></tr></table></figure>
+
+<p>这就像告诉服务端：</p>
+<p><em><strong>“喂！我这边来了一位游客，是从 <a target="_blank" rel="noopener" href="https://foo.example/">https://foo.example</a> 出发的，你愿不愿意接待他？”</strong></em></p>
+<p>如果服务器回答说：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Access-Control-Allow-Origin</span><span class="punctuation">: </span>https://foo.example</span><br></pre></td></tr></table></figure>
+<p><em><strong>“欢迎欢迎，我们这儿允许你这位游客入境。”</strong></em></p>
+<p>那么浏览器就放心了，把服务器的响应结果传给网页里的 JS 用了！</p>
+<p>但是如果服务器说：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Access-Control-Allow-Origin</span><span class="punctuation">: </span>*</span><br></pre></td></tr></table></figure>
+
+<p><em><strong>“我们谁都欢迎！”（广结善缘）</strong></em></p>
+<p>那么浏览器只会允许普通请求，不允许携带 cookie 的请求通过（因为太泛了，怕泄露隐私）。</p>
+<p><strong>🎬 第二幕：预检请求 —— 带刀剑的游客必须先查一查</strong></p>
+<p>如果你发的请求不再那么“简单”了，比如： </p>
+<ul>
+<li>带了 Authorization、X-Custom-Header 这样的自定义头；</li>
+<li>请求方法是 PUT、DELETE 等；</li>
+<li>请求体是 application&#x2F;json（不是默认的表单格式）；</li>
+</ul>
+<p>浏览器会马上警觉：</p>
+<p><em><strong>“这个游客行李太多、身份复杂，必须先发个探查请求去问一下那边边检站。”</strong></em></p>
+<p>于是浏览器会先发一个 预检请求（preflight request），这是一个 OPTIONS 请求，里面写着：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">OPTIONS</span> <span class="string">/api/data</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>https://foo.example</span><br><span class="line"><span class="attribute">Access-Control-Request-Method</span><span class="punctuation">: </span>POST</span><br><span class="line"><span class="attribute">Access-Control-Request-Headers</span><span class="punctuation">: </span>Authorization</span><br></pre></td></tr></table></figure>
+
+<p>这意思就是：</p>
+<p><em><strong>“你好，我打算从 <a target="_blank" rel="noopener" href="https://foo.example/">https://foo.example</a> 发一个 POST 请求，带上 Authorization，请问你同意吗？”</strong></em></p>
+<p>如果服务器说</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Access-Control-Allow-Origin</span><span class="punctuation">: </span>https://foo.example</span><br><span class="line"><span class="attribute">Access-Control-Allow-Methods</span><span class="punctuation">: </span>POST</span><br><span class="line"><span class="attribute">Access-Control-Allow-Headers</span><span class="punctuation">: </span>Authorization</span><br><span class="line"><span class="attribute">Access-Control-Allow-Credentials</span><span class="punctuation">: </span>true</span><br></pre></td></tr></table></figure>
+
+<p><em><strong>“我们查过啦，这个游客可以过关，请让他进来。”</strong></em></p>
+<p>浏览器才允许正式请求发出去！</p>
+<p>如果服务器没回答清楚，比如：</p>
+<ul>
+<li>没有 Access-Control-Allow-Origin</li>
+<li>没有 Access-Control-Allow-Headers</li>
+<li>Allow-Origin: * 却又想接收 Cookie</li>
+</ul>
+<p>那浏览器就会说：</p>
+<p><em><strong>“不行！你那边手续不全，我不让这个请求出去。”</strong></em></p>
+<p>🎬 第三幕：请求携带身份凭证 —— 需要贴身安检！</p>
+<p>如果你的请求想带 cookie、session 或者 Authorization 这种凭证，浏览器会特别小心。</p>
+<p>你得主动告诉浏览器：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">fetch</span>(<span class="string">&quot;https://bar.api.com/data&quot;</span>, &#123;</span><br><span class="line"><span class="attr">credentials</span>: <span class="string">&quot;include&quot;</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>就像告诉警察：</p>
+<p><em><strong>“这个游客带着身份证（cookie），得贴身检查！”</strong></em></p>
+<p>这时浏览器只会接受那些：</p>
+<ul>
+<li>Access-Control-Allow-Origin 指定了你的网站（不能是 *）</li>
+<li>Access-Control-Allow-Credentials: true 明确说：我接收带身份的游客！</li>
+</ul>
+<p>否则浏览器直接说：</p>
+<p><em><strong>“你带身份证来，但对方不欢迎，结果我就把这个回应扔掉，不给 JS 用。”</strong></em></p>
+<p>有时候即使你做对了所有 CORS 的设置，浏览器仍然不让你带 cookie！</p>
+<p>这是因为：很多浏览器默认会禁止跨站设置或发送 cookie，比如 Chrome、Safari 都开始阻止所谓的“第三方 cookie”（防广告追踪）。</p>
+<p>这时你要在服务器设置：</p>
+<figure class="highlight http"><figcaption><span>request</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Set-Cookie</span><span class="punctuation">: </span>token=abc123; SameSite=None; Secure</span><br></pre></td></tr></table></figure>
+
+<p><em><strong>“这个 cookie 是允许跨站的，而且必须在 HTTPS 下使用！”</strong></em></p>
+<p><strong>🎬 第四幕：重定向风波 —— 半路被拉去另一个国家</strong></p>
+<p>结果服务器 bar.api.com 回复说：</p>
+<p><em><strong>“哎哟，我不在这里办公啦，我们搬家了！请你去 <a target="_blank" rel="noopener" href="https://api2.other.com/data%E3%80%82%E2%80%9D">https://api2.other.com/data。”</a></strong></em></p>
+<p>这时候就发生了 重定向（服务器返回 302&#x2F;307）！</p>
+<p>这时候浏览器会说：</p>
+<p><em><strong>“等会儿，我这是发预检请求，你怎么半路换个国家让我去？我可不干！”</strong></em></p>
+</blockquote>
+<h2 id="4-Nginx反向代理"><a href="#4-Nginx反向代理" class="headerlink" title="4.Nginx反向代理"></a>4.Nginx反向代理</h2><p>反向代理是一种服务器，它接收客户端的请求，并将这些请求转发给后端的真实服务器处理，然后将响应返回给客户端。</p>
+<p>也就是说：</p>
+<pre><code>浏览器 → 反向代理（如 Nginx） → 后端服务
+</code></pre>
+<p>最终浏览器看到的是 Nginx，但 Nginx 在背后转发请求。</p>
+<ol>
+<li>在 Nginx 配置文件中，为需要代理的每个服务设置一个特定的前缀。</li>
+<li>配置Nginx将这些前缀的HTTP&#x2F;HTTPS请求转发到对应的真实服务器。</li>
+<li>通过这种方式，所有通过Nginx转发的URL都将具有相同的域名、协议和端口号，从而满足浏览器的同源策略要求。</li>
+</ol>
+<p>由于所有 URL 都指向同一个服务器，浏览器将它们视为同源，从而避免了跨域访问的限制。实际上，这些 URL 背后是由不同的物理服务器提供服务。这样，服务器内部的JavaScript代码就可以自由地跨域调用这些服务器上的资源。</p>
+<h2 id="5-postMessage（跨窗口-iframe-通信）"><a href="#5-postMessage（跨窗口-iframe-通信）" class="headerlink" title="5.postMessage（跨窗口&#x2F;iframe 通信）"></a>5.postMessage（跨窗口&#x2F;iframe 通信）</h2><p>在使用iframe或弹出窗口时，需要跨文档的消息传递。postMessage方法提供一种安全方式实现跨源通信，允许父窗口和子窗口之间进行消息交换。</p>
+<p>发送方（iframe或子窗口）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">window</span>.<span class="property">opener</span>.<span class="title function_">postMessage</span>(<span class="string">&#x27;你好，主窗口！&#x27;</span>, <span class="string">&#x27;http://example.com&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>接收方（主窗口）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">window</span>.<span class="title function_">addEventListener</span>(<span class="string">&#x27;message&#x27;</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (event.<span class="property">origin</span> !== <span class="string">&#x27;http://iframe.com&#x27;</span>) <span class="keyword">return</span>;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;收到消息：&#x27;</span>, event.<span class="property">data</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-WebSocket"><a href="#6-WebSocket" class="headerlink" title="6.WebSocket"></a>6.WebSocket</h2><p>WebSocket是HTML5的一个持久化协议，实现了浏览器与服务器的全双工通信。初次握手虽然为HTTP，但是连接建立好了之后客户端与服务器的通信就基于WS协议，与HTTP无关了。</p>
+<p><em><strong>服务端需监听 WebSocket 协议连接。</strong></em>，应用场景一般为实时数据，比如在线聊天室、股票推送等。</p>
+<h2 id="7-window-name-location-hash"><a href="#7-window-name-location-hash" class="headerlink" title="7.window.name &#x2F; location.hash"></a>7.window.name &#x2F; location.hash</h2><p>某些浏览器特性允许在跨页面之间通过window.name或location.hash传递数据。</p>
+<ul>
+<li>页面 A 打开 B.html，B.html 设置 window.name &#x3D; ‘数据’，再跳转回 A</li>
+<li>设置 B 的 location.hash &#x3D; ‘#data’，B 从 location.hash 中读取</li>
+</ul>
+<p><em><strong>仅限页面跳转数据传递，不适合 AJAX 场景。</strong></em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">Skye Lee</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2025/03/24/cors/">http://example.com/2025/03/24/cors/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%B7%A8%E5%9F%9F%EF%BC%8CHTTP/">跨域，HTTP</a></div><div class="post_share"><div class="social-share" data-image="/images/cors.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2025/03/23/question/" title="关于JS的更多..."><img class="cover" src="/img/loading.gif" data-original="/images/js6.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">关于JS的更多...</div></div></a></div></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div id="gitalk-container"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/images/girl.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Skye Lee</div><div class="author-info__description">Ordinary but also want to be elegant...</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">22</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/skyeuq"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/skyeuq" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:skyelll991@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">HAVE A MAGIC DAY!!</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%B7%A8%E5%9F%9F%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">为什么需要跨域？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-JSONP"><span class="toc-number">2.</span> <span class="toc-text">1.JSONP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-document-domain"><span class="toc-number">3.</span> <span class="toc-text">2.document.domain</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-CORS"><span class="toc-number">4.</span> <span class="toc-text">3.CORS</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E8%AF%B7%E6%B1%82%E6%98%AF%E6%8C%87%E4%B8%8D%E4%BC%9A%E8%A7%A6%E5%8F%91CORS%E9%A2%84%E6%A3%80%E8%AF%B7%E6%B1%82%E7%9A%84%E8%AF%B7%E6%B1%82%EF%BC%8C"><span class="toc-number">4.1.</span> <span class="toc-text">简单请求是指不会触发CORS预检请求的请求，</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E6%A3%80%E8%AF%B7%E6%B1%82%E5%8F%AF%E4%BB%A5%E9%81%BF%E5%85%8D%E8%B7%A8%E5%9F%9F%E8%AF%B7%E6%B1%82%E5%AF%B9%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E4%BA%A7%E7%94%9F%E6%9C%AA%E9%A2%84%E6%9C%9F%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="toc-number">4.2.</span> <span class="toc-text">预检请求可以避免跨域请求对服务器的用户数据产生未预期的影响</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%84%E5%B8%A6%E8%BA%AB%E4%BB%BD%E5%87%AD%E8%AF%81%E7%9A%84%E8%AF%B7%E6%B1%82"><span class="toc-number">4.3.</span> <span class="toc-text">附带身份凭证的请求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E7%90%86%E6%A0%87%E5%A4%B4%E5%AD%97%E6%AE%B5"><span class="toc-number">4.4.</span> <span class="toc-text">整理标头字段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="toc-number">5.</span> <span class="toc-text">4.Nginx反向代理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-postMessage%EF%BC%88%E8%B7%A8%E7%AA%97%E5%8F%A3-iframe-%E9%80%9A%E4%BF%A1%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">5.postMessage（跨窗口&#x2F;iframe 通信）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-WebSocket"><span class="toc-number">7.</span> <span class="toc-text">6.WebSocket</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-window-name-location-hash"><span class="toc-number">8.</span> <span class="toc-text">7.window.name &#x2F; location.hash</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/03/24/cors/" title="关于跨域..."><img src="/img/loading.gif" data-original="/images/cors.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="关于跨域..."/></a><div class="content"><a class="title" href="/2025/03/24/cors/" title="关于跨域...">关于跨域...</a><time datetime="2025-03-24T08:01:31.000Z" title="Created 2025-03-24 16:01:31">2025-03-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/23/question/" title="关于JS的更多..."><img src="/img/loading.gif" data-original="/images/js6.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="关于JS的更多..."/></a><div class="content"><a class="title" href="/2025/03/23/question/" title="关于JS的更多...">关于JS的更多...</a><time datetime="2025-03-23T10:45:00.000Z" title="Created 2025-03-23 18:45:00">2025-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/23/ajax/" title="关于Ajax..."><img src="/img/loading.gif" data-original="/images/ajax.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="关于Ajax..."/></a><div class="content"><a class="title" href="/2025/03/23/ajax/" title="关于Ajax...">关于Ajax...</a><time datetime="2025-03-23T06:39:28.000Z" title="Created 2025-03-23 14:39:28">2025-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/22/restful/" title="RESTful架构风格"><img src="/img/loading.gif" data-original="/images/restful.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RESTful架构风格"/></a><div class="content"><a class="title" href="/2025/03/22/restful/" title="RESTful架构风格">RESTful架构风格</a><time datetime="2025-03-22T09:34:02.000Z" title="Created 2025-03-22 17:34:02">2025-03-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/03/21/js/" title="深度拷贝、异常、this、防抖与节流"><img src="/img/loading.gif" data-original="/images/this.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度拷贝、异常、this、防抖与节流"/></a><div class="content"><a class="title" href="/2025/03/21/js/" title="深度拷贝、异常、this、防抖与节流">深度拷贝、异常、this、防抖与节流</a><time datetime="2025-03-21T09:44:00.000Z" title="Created 2025-03-21 17:44:00">2025-03-21</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/images/cors.png')"><div id="footer-wrap"><div class="copyright">&copy;2024 - 2025 By Skye Lee</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="Chat"><i class="fas fa-sms"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const initGitalk = () => {
+    const gitalk = new Gitalk(Object.assign({
+      clientID: 'Ov23liATZoHp5oR7AyQN',
+      clientSecret: '23fd094bfd973ae953010e15ec7b60d3ec393080',
+      repo: 'skyeuq.github.io.gitalk',
+      owner: 'skyeuq',
+      admin: ['skyeuq'],
+      id: '3ebade456bc1e565a92cca67e7669f16',
+      updateCountCallback: commentCount
+    },null))
+
+    gitalk.render('gitalk-container')
+  }
+
+  const loadGitalk = async() => {
+    if (typeof Gitalk === 'function') initGitalk()
+    else {
+      await getCSS('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css')
+      await getScript('https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js')
+      initGitalk()
+    }
+  }
+  
+  const commentCount = n => {
+    const isCommentCount = document.querySelector('#post-meta .gitalk-comment-count')
+    if (isCommentCount) {
+      isCommentCount.textContent= n
+    }
+  }
+
+  if ('Gitalk' === 'Gitalk' || !false) {
+    if (false) btf.loadComment(document.getElementById('gitalk-container'), loadGitalk)
+    else loadGitalk()
+  } else {
+    window.loadOtherComment = loadGitalk
+  }
+})()</script></div><script src="/js/dog-conversation.js?1"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="true"></script><script>(() => {
+  const isChatBtn = true
+  const isChatHideShow = false
+
+  if (isChatBtn) {
+    const close = () => {
+      Chatra('minimizeWidget')
+      Chatra('hide')
+    }
+
+    const open = () => {
+      Chatra('openChat', true)
+      Chatra('show')
+    }
+
+    window.ChatraSetup = {
+      startHidden: true
+    }
+  
+    window.chatBtnFn = () => {
+      const isShow = document.getElementById('chatra').classList.contains('chatra--expanded')
+      isShow ? close() : open()
+    }
+  } else if (isChatHideShow) {
+    window.chatBtn = {
+      hide: () => {
+        Chatra('hide')
+      },
+      show: () => {
+        Chatra('show')
+      }
+    }
+  }
+
+  (function(d, w, c) {
+    w.ChatraID = '4LkhtR8HjoFNgaQqK'
+    var s = d.createElement('script')
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments)
+    }
+    s.async = true
+    s.src = 'https://call.chatra.io/chatra.js'
+    if (d.head) d.head.appendChild(s)
+  })(document, window, 'Chatra')
+
+})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">Search</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  Loading the Database</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":180,"height":250},"mobile":{"show":true},"dialog":{"enable":true},"log":false});</script></body></html>
